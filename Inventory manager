@@ -1,0 +1,310 @@
+import java.util.ArrayList;
+import java.util.Comparator;
+
+public class InventoryManager {
+    private ArrayList<Product> inventory;
+
+    public ArrayList<Product> getInventory() {
+        return inventory;
+    }
+
+    public InventoryManager() {
+        inventory = new ArrayList<>();
+    }
+
+    public void loadDefaultProducts() {
+
+        inventory.add(new Product(1001, "Bananas", 2.50, 50, "Produce"));
+
+        inventory.add(new Product(1002, "Eggs", 3.50, 30, "Dairy"));
+
+        inventory.add(new BrandedItem(1003, "Cereal", 5.00, 25, "Breakfast", "Cheerios", "General Mills"));
+
+        inventory.add(new BrandedItem(1004, "Soda", 2.00, 40, "Beverages", "Coca-Cola", "Coca-Cola Co."));
+
+        inventory.add(new GenericItem(1005, "Store Bread", 2.00, 35, "Bakery", "FreshMart Store Brand"));
+    }
+
+    public void addProduct(Product product) {
+        inventory.add(product);
+        System.out.printf("%s was added to inventory.", product.name);
+    }
+
+    public void removeProduct(String name, int amount) {
+
+        if (inventory.isEmpty()) {
+            System.out.println("No products in inventory.");
+            return;
+        }
+
+        if (amount <= 0) {
+            System.out.println("Amount to remove must be greater than 0.");
+            return;
+        }
+
+        for (int i = 0; i < inventory.size(); i++) {
+
+            Product product = inventory.get(i);
+
+            if (product.name.equalsIgnoreCase(name)) {
+
+                if (amount > product.quantity) {
+                    System.out.printf("You tried to remove %d, but only %d exist.%n",
+                            amount, product.quantity);
+                    return;
+                }
+
+                product.quantity -= amount;
+                System.out.printf("Removed %d of %s.%n",
+                        amount, product.name);
+
+                // If stock reaches 0, remove product entirely
+                if (product.quantity == 0) {
+                    inventory.remove(i);
+                    System.out.printf("%s has 0 stock and was removed from inventory.%n",
+                            product.name);
+                }
+
+                return;
+            }
+        }
+
+        System.out.printf("Product named \"%s\" was not found.%n", name);
+    }
+
+    public void viewInventory() {
+        if (inventory.isEmpty()) {
+            System.out.println("No products in inventory.");
+            return;
+        }
+
+        System.out.println("\n--- CURRENT INVENTORY ---");
+        for (Product product : inventory) {
+            printProductDetails(product);
+        }
+    }
+
+    //Polymorphism used in printing details
+    private void printProductDetails(Product product) {
+        System.out.printf(
+                "Item ID: %d%n" +
+                        "Name: %s%n" +
+                        "Category: %s%n" +
+                        "Price: $%.2f%n" +
+                        "Quantity: %d%n",
+                product.itemID,
+                product.name,
+                product.category,
+                product.price,   // if price is stored as cents (int)
+                product.quantity
+        );
+
+        // Show extra info depending on what kind of product it is
+        if (product instanceof BrandedItem) {
+            BrandedItem branded = (BrandedItem) product;
+            System.out.printf(
+                    "Brand: %s%n" +
+                            "Manufacturer: %s%n",
+                    branded.getBrandName(),
+                    branded.getManufacturerName()
+            );
+        } else if (product instanceof GenericItem) {
+            GenericItem generic = (GenericItem) product;
+            System.out.printf(
+                    "Store Label: %s%n",
+                    generic.getStoreLabelInformation()
+            );
+        }
+
+        System.out.println("-----------------------------------");
+    }
+
+    public void viewStats() {
+        if (inventory.isEmpty()) {
+            System.out.println("No products in inventory, so no stats to show.");
+            return;
+        }
+
+        System.out.println("\n--- PRODUCT INVENTORY STATS ---");
+
+        for (Product product : inventory) {
+            System.out.printf(
+                    "Name: %s | Item ID: %d | Quantity: %d%n",
+                    product.name,
+                    product.itemID,
+                    product.quantity
+            );
+        }
+    }
+
+    public void viewStatsFor(String name) {
+        if (inventory.isEmpty()) {
+            System.out.println("No products in inventory, so no stats to show.");
+            return;
+        }
+
+        for (Product product : inventory) {
+            if (product.name.equalsIgnoreCase(name)) {
+
+                System.out.println("\n--- STATS FOR \"" + product.name + "\" ---");
+                System.out.printf("Item ID: %d%n", product.itemID);
+                System.out.printf("Category: %s%n", product.category);
+                System.out.printf("Price: $%.2f%n", product.price);
+                System.out.printf("Quantity in stock: %d%n", product.quantity);
+                System.out.printf("Total product value: $%.2f%n",
+                        (product.price) * product.quantity);
+
+                return;
+            }
+        }
+
+        System.out.printf("Product named \"%s\" was not found in inventory.%n", name);
+    }
+
+    public boolean purchaseProduct(String name) {
+        if (inventory.isEmpty()) {
+            System.out.println("No products available to purchase.");
+            return false;
+        }
+
+        for (Product product : inventory) {
+            if (product.name.equalsIgnoreCase(name)) {
+
+                if (product.quantity <= 0) {
+                    System.out.printf("%s is currently out of stock and cannot be purchased.%n", product.name);
+                    return false;
+                }
+
+                product.quantity -= 1;
+                product.timesPurchased++;
+                System.out.printf("You purchased \"%s\" for $%.2f. Remaining stock: %d%n",
+                        product.name, product.price, product.quantity);
+                return true;
+            }
+        }
+
+        System.out.printf("Product named \"%s\" was not found.%n", name);
+        return false;
+    }
+
+    public void updateProduct(String name, String field, String newValue) {
+
+        for (Product product : inventory) {
+
+            if (product.name.equalsIgnoreCase(name)) {
+
+                switch (field.toLowerCase()) {
+
+                    case "name":
+                        product.name = newValue;
+                        System.out.println("Name updated.");
+                        return;
+
+                    case "price":
+                        try {
+                            double newPrice = Double.parseDouble(newValue);
+                            if (newPrice < 0) {
+                                System.out.println("Price cannot be negative.");
+                                return;
+                            }
+                            product.price = newPrice;
+                            System.out.println("Price updated.");
+                            return;
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid price.");
+                            return;
+                        }
+
+                    case "quantity":
+                        try {
+                            int newQuantity = Integer.parseInt(newValue);
+                            if (newQuantity < 0) {
+                                System.out.println("Quantity cannot be negative.");
+                                return;
+                            }
+                            product.quantity = newQuantity;
+                            System.out.println("Quantity updated.");
+                            return;
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid quantity.");
+                            return;
+                        }
+
+                    case "category":
+                        product.category = newValue;
+                        System.out.println("Category updated.");
+                        return;
+
+                    default:
+                        System.out.println("Invalid field.");
+                        return;
+                }
+            }
+        }
+
+        System.out.println("Product not found.");
+    }
+
+    public Product searchProductByName(String name) {
+        if (inventory.isEmpty()) {
+            return null;
+        }
+
+        for (Product product : inventory) {
+            if (product.name.equalsIgnoreCase(name)) {
+                return product;
+            }
+        }
+        return null; // not found
+    }
+
+    public Product searchProductByID(int id) {
+        if (inventory.isEmpty()) {
+            return null;
+        }
+
+        for (Product product : inventory) {
+            if (product.itemID == id) {
+                return product;
+            }
+        }
+
+        return null;
+    }
+
+
+    public void sortAZ(ArrayList<Product> inventory) {
+
+        if (inventory.isEmpty()) {
+            System.out.println("No products in inventory to sort.");
+            return;
+        }
+
+        inventory.sort(Comparator.comparing(
+                p -> p.name,
+                String.CASE_INSENSITIVE_ORDER
+        ));
+
+        System.out.println("Products sorted A–Z by name.");
+    }
+
+    public void sortByPriceLowHigh() {
+        if (inventory.isEmpty()) {
+            System.out.println("No products in inventory to sort.");
+            return;
+        }
+
+        inventory.sort(Comparator.comparingDouble(p -> p.price));
+        System.out.println("Products sorted by price (low to high).");
+    }
+
+    public void sortByQuantityLowHigh() {
+        if (inventory.isEmpty()) {
+            System.out.println("No products in inventory to sort.");
+            return;
+        }
+
+        inventory.sort(Comparator.comparingInt(p -> p.quantity));
+        System.out.println("Products sorted by quantity (low to high).");
+    }
+}
