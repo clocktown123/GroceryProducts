@@ -1,0 +1,333 @@
+import java.util.Scanner;
+
+public class ProductDriver {
+
+    public static void main(String[] args) {
+
+        InventoryManager manager = new InventoryManager();
+        manager.loadDefaultProducts();
+
+        Scanner scanner = new Scanner(System.in);
+
+        boolean running = true;
+
+        while (running) {
+            System.out.println("\n=== GROCERY INVENTORY SYSTEM ===");
+            System.out.println("1. Manager Mode");
+            System.out.println("2. User Mode");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+
+            int choice = readInt(scanner);
+
+            switch (choice) {
+                case 1:
+                    runManagerMode(scanner, manager);
+                    break;
+                case 2:
+                    runUserMode(scanner, manager);
+                    break;
+                case 3:
+                    running = false;
+                    System.out.println("Goodbye!");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please enter 1–3.");
+            }
+        }
+
+        scanner.close();
+    }
+
+    // -------------------- MANAGER MODE --------------------
+    private static void runManagerMode(Scanner scanner, InventoryManager manager) {
+        boolean inManagerMode = true;
+
+        while (inManagerMode) {
+            System.out.println("\n--- MANAGER MODE ---");
+            System.out.println("1. View Full Inventory Report");
+            System.out.println("2. Add New Item");
+            System.out.println("3. Delete/Remove Stock");
+            System.out.println("4. Update Product (name/price/quantity/category)");
+            System.out.println("5. Search (by ID or Name)");
+            System.out.println("6. Sort Inventory");
+            System.out.println("7. View Stats");
+            System.out.println("8. Back to Main Menu");
+            System.out.print("Choose an option: ");
+
+            int choice = readInt(scanner);
+
+            switch (choice) {
+                case 1:
+                    manager.viewInventory();
+                    break;
+
+                case 2:
+                    addItemFlow(scanner, manager);
+                    break;
+
+                case 3:
+                    removeItemFlow(scanner, manager);
+                    break;
+
+                case 4:
+                    updateItemFlow(scanner, manager);
+                    break;
+
+                case 5:
+                    searchFlow(scanner, manager, true);
+                    break;
+
+                case 6:
+                    sortFlow(scanner, manager);
+                    break;
+
+                case 7:
+                    statsFlow(scanner, manager);
+                    break;
+
+                case 8:
+                    inManagerMode = false;
+                    break;
+
+                default:
+                    System.out.println("Invalid choice. Please enter 1–8.");
+            }
+        }
+    }
+
+    // -------------------- USER MODE --------------------
+    private static void runUserMode(Scanner scanner, InventoryManager manager) {
+        boolean inUserMode = true;
+
+        while (inUserMode) {
+            System.out.println("\n--- USER MODE ---");
+            System.out.println("1. View Available Items");
+            System.out.println("2. Search Items");
+            System.out.println("3. View Item Details (by Name)");
+            System.out.println("4. Purchase Item");
+            System.out.println("5. Back to Main Menu");
+            System.out.print("Choose an option: ");
+
+            int choice = readInt(scanner);
+
+            switch (choice) {
+                case 1:
+                    manager.viewInventory();
+                    break;
+
+                case 2:
+                    searchFlow(scanner, manager, false);
+                    break;
+
+                case 3:
+                    System.out.print("Enter product name to view details: ");
+                    String detailName = scanner.nextLine();
+                    manager.viewStatsFor(detailName); // shows details + total value
+                    break;
+
+                case 4:
+                    System.out.print("Enter product name to purchase: ");
+                    String purchaseName = scanner.nextLine();
+                    manager.purchaseProduct(purchaseName);
+                    break;
+
+                case 5:
+                    inUserMode = false;
+                    break;
+
+                default:
+                    System.out.println("Invalid choice. Please enter 1–5.");
+            }
+        }
+    }
+
+    // -------------------- FLOWS --------------------
+    private static void addItemFlow(Scanner scanner, InventoryManager manager) {
+        System.out.println("\nAdd what type of item?");
+        System.out.println("1. Product (Generic/Base)");
+        System.out.println("2. Branded Item");
+        System.out.println("3. Generic Store Item");
+        System.out.print("Choose an option: ");
+
+        int type = readInt(scanner);
+
+        System.out.print("Item ID: ");
+        int itemID = readInt(scanner);
+
+        System.out.print("Name: ");
+        String name = scanner.nextLine();
+
+        System.out.print("Price (ex: 2.50): ");
+        double price = readDouble(scanner);
+
+        System.out.print("Quantity: ");
+        int quantity = readNonNegativeInt(scanner);
+
+        System.out.print("Category: ");
+        String category = scanner.nextLine();
+
+        if (type == 1) {
+            manager.addProduct(new Product(itemID, name, price, quantity, category));
+        } else if (type == 2) {
+            System.out.print("Brand Name: ");
+            String brand = scanner.nextLine();
+            System.out.print("Manufacturer Name: ");
+            String manu = scanner.nextLine();
+
+            manager.addProduct(new BrandedItem(itemID, name, price, quantity, category, brand, manu));
+        } else if (type == 3) {
+            System.out.print("Store Label Information: ");
+            String storeLabel = scanner.nextLine();
+
+            manager.addProduct(new GenericItem(itemID, name, price, quantity, category, storeLabel));
+        } else {
+            System.out.println("Invalid item type.");
+        }
+    }
+
+    private static void removeItemFlow(Scanner scanner, InventoryManager manager) {
+        System.out.print("Enter product name to remove: ");
+        String name = scanner.nextLine();
+
+        System.out.print("Enter amount to remove: ");
+        int amount = readNonNegativeInt(scanner);
+
+        manager.removeProduct(name, amount);
+    }
+
+    private static void updateItemFlow(Scanner scanner, InventoryManager manager) {
+        System.out.print("Enter product name to update: ");
+        String name = scanner.nextLine();
+
+        System.out.println("What would you like to update? (name, price, quantity, category)");
+        System.out.print("Field: ");
+        String field = scanner.nextLine();
+
+        System.out.print("New value: ");
+        String newValue = scanner.nextLine();
+
+        manager.updateProduct(name, field, newValue);
+    }
+
+    private static void searchFlow(Scanner scanner, InventoryManager manager, boolean showDetailsIfFound) {
+        System.out.println("\nSearch by:");
+        System.out.println("1. ID");
+        System.out.println("2. Name");
+        System.out.print("Choose an option: ");
+
+        int searchChoice = readInt(scanner);
+
+        if (searchChoice == 1) {
+            System.out.print("Enter Item ID: ");
+            int id = readInt(scanner);
+
+            Product found = manager.searchProductByID(id);
+            if (found == null) {
+                System.out.println("No product found with that ID.");
+            } else {
+                System.out.println("Found: " + found.name);
+                if (showDetailsIfFound) {
+                    manager.viewStatsFor(found.name);
+                }
+            }
+        } else if (searchChoice == 2) {
+            System.out.print("Enter product name: ");
+            String name = scanner.nextLine();
+
+            Product found = manager.searchProductByName(name);
+            if (found == null) {
+                System.out.println("No product found with that name.");
+            } else {
+                System.out.println("Found: " + found.name);
+                if (showDetailsIfFound) {
+                    manager.viewStatsFor(found.name);
+                }
+            }
+        } else {
+            System.out.println("Invalid search option.");
+        }
+    }
+
+    private static void sortFlow(Scanner scanner, InventoryManager manager) {
+        System.out.println("\nSort by:");
+        System.out.println("1. Name (A–Z)");
+        System.out.println("2. Price (Low–High)");
+        System.out.println("3. Quantity (Low–High)");
+        System.out.print("Choose an option: ");
+
+        int choice = readInt(scanner);
+
+        switch (choice) {
+            case 1:
+                // Recommended: change your InventoryManager sortAZ to a non-static instance method
+                manager.sortAZ(manager.getInventory()); // works with your current code
+                break;
+            case 2:
+                manager.sortByPriceLowHigh();
+                break;
+            case 3:
+                manager.sortByQuantityLowHigh();
+                break;
+            default:
+                System.out.println("Invalid sort option.");
+                return;
+        }
+
+        manager.viewInventory();
+    }
+
+    private static void statsFlow(Scanner scanner, InventoryManager manager) {
+        System.out.println("\nStats:");
+        System.out.println("1. View all product stats (name/id/quantity)");
+        System.out.println("2. View stats for one product");
+        System.out.print("Choose an option: ");
+
+        int choice = readInt(scanner);
+
+        if (choice == 1) {
+            manager.viewStats();
+        } else if (choice == 2) {
+            System.out.print("Enter product name: ");
+            String name = scanner.nextLine();
+            manager.viewStatsFor(name);
+        } else {
+            System.out.println("Invalid stats option.");
+        }
+    }
+
+    // -------------------- INPUT HELPERS --------------------
+    private static int readInt(Scanner scanner) {
+        while (true) {
+            try {
+                String input = scanner.nextLine().trim();
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.print("Invalid number. Try again: ");
+            }
+        }
+    }
+
+    private static int readNonNegativeInt(Scanner scanner) {
+        while (true) {
+            int value = readInt(scanner);
+            if (value < 0) {
+                System.out.print("Value cannot be negative. Try again: ");
+            } else {
+                return value;
+            }
+        }
+    }
+
+    private static double readDouble(Scanner scanner) {
+        while (true) {
+            try {
+                String input = scanner.nextLine().trim();
+                double value = Double.parseDouble(input);
+                return value;
+            } catch (NumberFormatException e) {
+                System.out.print("Invalid decimal number. Try again (ex: 2.50): ");
+            }
+        }
+    }
+}
