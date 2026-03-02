@@ -12,17 +12,24 @@ public class InventoryManager {
         inventory = new ArrayList<>();
     }
 
+    //polymorphism with array
     public void loadDefaultProducts() {
 
         inventory.add(new Product(1001, "Bananas", 2.50, 50, "Produce"));
-
         inventory.add(new Product(1002, "Eggs", 3.50, 30, "Dairy"));
-
         inventory.add(new BrandedItem(1003, "Cereal", 5.00, 25, "Breakfast", "Cheerios", "General Mills"));
-
         inventory.add(new BrandedItem(1004, "Soda", 2.00, 40, "Beverages", "Coca-Cola", "Coca-Cola Co."));
-
         inventory.add(new GenericItem(1005, "Store Bread", 2.00, 35, "Bakery", "FreshMart Store Brand"));
+        inventory.add(new Product(1006, "Apples", 3.00, 45, "Produce"));
+        inventory.add(new Product(1007, "Milk", 4.25, 20, "Dairy"));
+        inventory.add(new BrandedItem(1008, "Potato Chips", 4.50, 28, "Snacks", "Lay's Classic", "Frito-Lay"));
+        inventory.add(new BrandedItem(1009, "Frozen Pizza", 7.99, 18, "Frozen Foods", "DiGiorno", "Nestlé"));
+        inventory.add(new BrandedItem(1010, "Ice Cream", 6.49, 15, "Frozen Foods", "Ben & Jerry's", "Unilever"));
+        inventory.add(new GenericItem(1011, "Store Pasta", 1.75, 60, "Pantry", "FreshMart Store Brand"));
+        inventory.add(new GenericItem(1012, "Store Peanut Butter", 3.25, 22, "Pantry", "FreshMart Store Brand"));
+        inventory.add(new Product(1013, "Chicken Breast", 9.50, 12, "Meat"));
+        inventory.add(new BrandedItem(1014, "Orange Juice", 4.75, 26, "Beverages", "Tropicana", "PepsiCo"));
+        inventory.add(new GenericItem(1015, "Paper Towels", 8.99, 16, "Household", "FreshMart Store Brand"));
     }
 
     public void addProduct(Product product) {
@@ -103,17 +110,10 @@ public class InventoryManager {
         if (product instanceof BrandedItem) {
             BrandedItem branded = (BrandedItem) product;
             System.out.printf(
-                    "Brand: %s%n" +
-                            "Manufacturer: %s%n",
-                    branded.getBrandName(),
-                    branded.getManufacturerName()
-            );
+                    "Brand: %s%n" + "Manufacturer: %s%n", branded.getBrandName(), branded.getManufacturerName());
         } else if (product instanceof GenericItem) {
             GenericItem generic = (GenericItem) product;
-            System.out.printf(
-                    "Store Label: %s%n",
-                    generic.getStoreLabelInformation()
-            );
+            System.out.printf("Store Label: %s%n", generic.getStoreLabelInformation());
         }
 
         System.out.println("-----------------------------------");
@@ -272,7 +272,6 @@ public class InventoryManager {
         return null;
     }
 
-
     public void sortAZ(ArrayList<Product> inventory) {
 
         if (inventory.isEmpty()) {
@@ -280,10 +279,7 @@ public class InventoryManager {
             return;
         }
 
-        inventory.sort(Comparator.comparing(
-                p -> p.name,
-                String.CASE_INSENSITIVE_ORDER
-        ));
+        sortRecursiveAlphabetical(inventory, 0);
 
         System.out.println("Products sorted A–Z by name.");
     }
@@ -294,7 +290,8 @@ public class InventoryManager {
             return;
         }
 
-        inventory.sort(Comparator.comparingDouble(p -> p.price));
+        sortRecursiveNum(inventory, 0, 2);
+        //inventory.sort(Comparator.comparingDouble(p -> p.price));
         System.out.println("Products sorted by price (low to high).");
     }
 
@@ -304,7 +301,77 @@ public class InventoryManager {
             return;
         }
 
-        inventory.sort(Comparator.comparingInt(p -> p.quantity));
+        sortRecursiveNum(inventory, 0, 1);
+
+        //inventory.sort(Comparator.comparingInt(p -> p.quantity));
         System.out.println("Products sorted by quantity (low to high).");
     }
+
+
+    //RECURSIVE HELPER METHODS##########################################################################################
+    private static void sortRecursiveAlphabetical(ArrayList<Product> inventory, int startIndex) {
+
+        // BASE CASE
+        if (startIndex >= inventory.size() - 1) {
+            return;
+        }
+
+        // Find index of smallest name
+        int smallestIndex = startIndex;
+
+        for (int i = startIndex + 1; i < inventory.size(); i++) {
+            if (inventory.get(i).name.compareToIgnoreCase(
+                    inventory.get(smallestIndex).name) < 0) {
+
+                smallestIndex = i;
+            }
+        }
+
+        // Swap
+        Product temp = inventory.get(startIndex);
+        inventory.set(startIndex, inventory.get(smallestIndex));
+        inventory.set(smallestIndex, temp);
+
+        // RECURSIVE CALL
+        sortRecursiveAlphabetical(inventory, startIndex + 1);
+    }
+
+    private static void sortRecursiveNum(ArrayList<Product> inventory, int startIndex, int mode) {
+
+        // BASE CASE
+        if (startIndex >= inventory.size() - 1) {
+            return;
+        }
+
+        // Find index of smallest quantity
+        int smallestIndex = startIndex;
+
+        switch (mode){
+            case 1:
+                for (int i = startIndex + 1; i < inventory.size(); i++) {
+                    if (inventory.get(i).quantity < inventory.get(smallestIndex).quantity) {
+                        smallestIndex = i;
+                    }
+                }
+                break;
+            case 2:
+                for (int i = startIndex + 1; i < inventory.size(); i++) {
+                    if (inventory.get(i).price < inventory.get(smallestIndex).price) {
+                        smallestIndex = i;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+
+        // Swap
+        Product temp = inventory.get(startIndex);
+        inventory.set(startIndex, inventory.get(smallestIndex));
+        inventory.set(smallestIndex, temp);
+
+        // RECURSIVE CALL
+        sortRecursiveNum(inventory, startIndex + 1, mode);
+    }
+
 }
