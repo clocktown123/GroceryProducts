@@ -7,7 +7,7 @@ public class ProductDriver {
         InventoryManager manager = new InventoryManager();
         manager.loadDefaultProducts();
 
-        Scanner scanner = new Scanner(System.in);
+        Scanner stdIn = new Scanner(System.in);
 
         boolean running = true;
 
@@ -18,14 +18,14 @@ public class ProductDriver {
             System.out.println("3. Exit");
             System.out.print("Choose an option: ");
 
-            int choice = readInt(scanner);
+            int choice = readInt(stdIn);
 
             switch (choice) {
                 case 1:
-                    runManagerMode(scanner, manager);
+                    runManagerMode(stdIn, manager);
                     break;
                 case 2:
-                    runUserMode(scanner, manager);
+                    runUserMode(stdIn, manager);
                     break;
                 case 3:
                     running = false;
@@ -36,11 +36,11 @@ public class ProductDriver {
             }
         }
 
-        scanner.close();
+        stdIn.close();
     }
 
     // -------------------- MANAGER MODE --------------------
-    private static void runManagerMode(Scanner scanner, InventoryManager manager) {
+    private static void runManagerMode(Scanner stdIn, InventoryManager manager) {
         boolean inManagerMode = true;
 
         while (inManagerMode) {
@@ -55,7 +55,7 @@ public class ProductDriver {
             System.out.println("8. Back to Main Menu");
             System.out.print("Choose an option: ");
 
-            int choice = readInt(scanner);
+            int choice = readInt(stdIn);
 
             switch (choice) {
                 case 1:
@@ -63,27 +63,27 @@ public class ProductDriver {
                     break;
 
                 case 2:
-                    addItemFlow(scanner, manager);
+                    addItemFlow(stdIn, manager);
                     break;
 
                 case 3:
-                    removeItemFlow(scanner, manager);
+                    removeItemFlow(stdIn, manager);
                     break;
 
                 case 4:
-                    updateItemFlow(scanner, manager);
+                    updateItemFlow(stdIn, manager);
                     break;
 
                 case 5:
-                    searchFlow(scanner, manager, true);
+                    searchFlow(stdIn, manager, true);
                     break;
 
                 case 6:
-                    sortFlow(scanner, manager);
+                    sortFlow(stdIn, manager);
                     break;
 
                 case 7:
-                    statsFlow(scanner, manager);
+                    statsFlow(stdIn, manager);
                     break;
 
                 case 8:
@@ -97,7 +97,7 @@ public class ProductDriver {
     }
 
     // -------------------- USER MODE --------------------
-    private static void runUserMode(Scanner scanner, InventoryManager manager) {
+    private static void runUserMode(Scanner stdIn, InventoryManager manager) {
         boolean inUserMode = true;
 
         while (inUserMode) {
@@ -109,7 +109,7 @@ public class ProductDriver {
             System.out.println("5. Back to Main Menu");
             System.out.print("Choose an option: ");
 
-            int choice = readInt(scanner);
+            int choice = readInt(stdIn);
 
             switch (choice) {
                 case 1:
@@ -117,18 +117,18 @@ public class ProductDriver {
                     break;
 
                 case 2:
-                    searchFlow(scanner, manager, false);
+                    searchFlow(stdIn, manager, false);
                     break;
 
                 case 3:
                     System.out.print("Enter product name to view details: ");
-                    String detailName = scanner.nextLine();
+                    String detailName = stdIn.nextLine();
                     manager.viewStatsFor(detailName); // shows details + total value
                     break;
 
                 case 4:
                     System.out.print("Enter product name to purchase: ");
-                    String purchaseName = scanner.nextLine();
+                    String purchaseName = stdIn.nextLine();
                     manager.purchaseProduct(purchaseName);
                     break;
 
@@ -143,42 +143,42 @@ public class ProductDriver {
     }
 
     // -------------------- FLOWS --------------------
-    private static void addItemFlow(Scanner scanner, InventoryManager manager) {
+    private static void addItemFlow(Scanner stdIn, InventoryManager manager) {
         System.out.println("\nAdd what type of item?");
         System.out.println("1. Product (Generic/Base)");
         System.out.println("2. Branded Item");
         System.out.println("3. Generic Store Item");
         System.out.print("Choose an option: ");
 
-        int type = readInt(scanner);
+        int type = readInt(stdIn);
 
         System.out.print("Item ID: ");
-        int itemID = readInt(scanner);
+        int itemID = readInt(stdIn);
 
         System.out.print("Name: ");
-        String name = scanner.nextLine();
+        String name = stdIn.nextLine();
 
         System.out.print("Price (ex: 2.50): ");
-        double price = readDouble(scanner);
+        double price = readDouble(stdIn);
 
         System.out.print("Quantity: ");
-        int quantity = readNonNegativeInt(scanner);
+        int quantity = readNonNegativeInt(stdIn);
 
         System.out.print("Category: ");
-        String category = scanner.nextLine();
+        String category = stdIn.nextLine();
 
         if (type == 1) {
             manager.addProduct(new Product(itemID, name, price, quantity, category));
         } else if (type == 2) {
             System.out.print("Brand Name: ");
-            String brand = scanner.nextLine();
+            String brand = stdIn.nextLine();
             System.out.print("Manufacturer Name: ");
-            String manu = scanner.nextLine();
+            String manu = stdIn.nextLine();
 
             manager.addProduct(new BrandedItem(itemID, name, price, quantity, category, brand, manu));
         } else if (type == 3) {
             System.out.print("Store Label Information: ");
-            String storeLabel = scanner.nextLine();
+            String storeLabel = stdIn.nextLine();
 
             manager.addProduct(new GenericItem(itemID, name, price, quantity, category, storeLabel));
         } else {
@@ -186,41 +186,41 @@ public class ProductDriver {
         }
     }
 
-    private static void removeItemFlow(Scanner scanner, InventoryManager manager) {
+    private static void removeItemFlow(Scanner stdIn, InventoryManager manager) {
         System.out.print("Enter product name to remove: ");
-        String name = scanner.nextLine();
+        String name = stdIn.nextLine();
 
         System.out.print("Enter amount to remove: ");
-        int amount = readNonNegativeInt(scanner);
+        int amount = readNonNegativeInt(stdIn);
 
         manager.removeProduct(name, amount);
     }
 
-    private static void updateItemFlow(Scanner scanner, InventoryManager manager) {
+    private static void updateItemFlow(Scanner stdIn, InventoryManager manager) {
         System.out.print("Enter product name to update: ");
-        String name = scanner.nextLine();
+        String name = stdIn.nextLine();
 
         System.out.println("What would you like to update? (name, price, quantity, category)");
         System.out.print("Field: ");
-        String field = scanner.nextLine();
+        String field = stdIn.nextLine();
 
         System.out.print("New value: ");
-        String newValue = scanner.nextLine();
+        String newValue = stdIn.nextLine();
 
         manager.updateProduct(name, field, newValue);
     }
 
-    private static void searchFlow(Scanner scanner, InventoryManager manager, boolean showDetailsIfFound) {
+    private static void searchFlow(Scanner stdIn, InventoryManager manager, boolean showDetailsIfFound) {
         System.out.println("\nSearch by:");
         System.out.println("1. ID");
         System.out.println("2. Name");
         System.out.print("Choose an option: ");
 
-        int searchChoice = readInt(scanner);
+        int searchChoice = readInt(stdIn);
 
         if (searchChoice == 1) {
             System.out.print("Enter Item ID: ");
-            int id = readInt(scanner);
+            int id = readInt(stdIn);
 
             Product found = manager.searchProductByID(id);
             if (found == null) {
@@ -233,7 +233,7 @@ public class ProductDriver {
             }
         } else if (searchChoice == 2) {
             System.out.print("Enter product name: ");
-            String name = scanner.nextLine();
+            String name = stdIn.nextLine();
 
             Product found = manager.searchProductByName(name);
             if (found == null) {
@@ -249,14 +249,14 @@ public class ProductDriver {
         }
     }
 
-    private static void sortFlow(Scanner scanner, InventoryManager manager) {
+    private static void sortFlow(Scanner stdIn, InventoryManager manager) {
         System.out.println("\nSort by:");
         System.out.println("1. Name (A–Z)");
         System.out.println("2. Price (Low–High)");
         System.out.println("3. Quantity (Low–High)");
         System.out.print("Choose an option: ");
 
-        int choice = readInt(scanner);
+        int choice = readInt(stdIn);
 
         switch (choice) {
             case 1:
@@ -277,19 +277,19 @@ public class ProductDriver {
         manager.viewInventory();
     }
 
-    private static void statsFlow(Scanner scanner, InventoryManager manager) {
+    private static void statsFlow(Scanner stdIn, InventoryManager manager) {
         System.out.println("\nStats:");
         System.out.println("1. View all product stats (name/id/quantity)");
         System.out.println("2. View stats for one product");
         System.out.print("Choose an option: ");
 
-        int choice = readInt(scanner);
+        int choice = readInt(stdIn);
 
         if (choice == 1) {
             manager.viewStats();
         } else if (choice == 2) {
             System.out.print("Enter product name: ");
-            String name = scanner.nextLine();
+            String name = stdIn.nextLine();
             manager.viewStatsFor(name);
         } else {
             System.out.println("Invalid stats option.");
@@ -297,10 +297,10 @@ public class ProductDriver {
     }
 
     // -------------------- INPUT HELPERS --------------------
-    private static int readInt(Scanner scanner) {
+    private static int readInt(Scanner stdIn) {
         while (true) {
             try {
-                String input = scanner.nextLine().trim();
+                String input = stdIn.nextLine().trim();
                 return Integer.parseInt(input);
             } catch (NumberFormatException e) {
                 System.out.print("Invalid number. Try again: ");
@@ -308,9 +308,9 @@ public class ProductDriver {
         }
     }
 
-    private static int readNonNegativeInt(Scanner scanner) {
+    private static int readNonNegativeInt(Scanner stdIn) {
         while (true) {
-            int value = readInt(scanner);
+            int value = readInt(stdIn);
             if (value < 0) {
                 System.out.print("Value cannot be negative. Try again: ");
             } else {
@@ -319,10 +319,10 @@ public class ProductDriver {
         }
     }
 
-    private static double readDouble(Scanner scanner) {
+    private static double readDouble(Scanner stdIn) {
         while (true) {
             try {
-                String input = scanner.nextLine().trim();
+                String input = stdIn.nextLine().trim();
                 double value = Double.parseDouble(input);
                 return value;
             } catch (NumberFormatException e) {
